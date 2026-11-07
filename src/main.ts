@@ -1,15 +1,12 @@
 import { loadRuntimeConfig } from "./config/runtime-config.js";
-import { createHttpServer } from "./http/create-http-server.js";
-import { CustomHashTable } from "./storage/custom-hash-table.js";
+import { createCacheLab } from "./app.js";
 
 try {
   const config = loadRuntimeConfig(process.env);
-  const cache = new CustomHashTable(config.cacheMaxBytes);
-  const server = createHttpServer();
-
-  server.listen(config.port, config.host, () => {
+  const { app, engine } = createCacheLab(config);
+  const server = app.listen(config.port, config.host, () => {
     console.info(`CacheLab listening on http://${config.host}:${config.port}`);
-    console.info(`Cache capacity: ${cache.getStats().maxBytes} bytes`);
+    console.info(`Cache capacity: ${engine.getStats().maxBytes} bytes`);
   });
 
   const stop = () => {

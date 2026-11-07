@@ -12,9 +12,10 @@ Implemented:
 - UTF-8 capacity limit;
 - automatic resize above a `0.75` load factor;
 - unit tests using the Node.js test runner.
-- minimal HTTP backend with a `GET /health` endpoint;
+- Express HTTP adapter with a `GET /health` endpoint;
 - external capacity and network configuration;
 - safe default binding to `127.0.0.1`.
+- separated application ports, adapters, configuration and storage engine;
 
 Not implemented yet: CRUD HTTP endpoints, logging, metrics, OpenAPI, Docker, CI and benchmarks.
 
@@ -35,4 +36,4 @@ npm start
 ```
 
 Configuration is read from the environment. `CACHE_MAX_BYTES` is required;
-`HOST` defaults to `127.0.0.1` and `PORT` defaults to `3000`.
+`HOST` defaults to `127.0.0.1`, `PORT` to `3000`, and request bodies to `1mb`.

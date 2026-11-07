@@ -1,37 +1,13 @@
-export type CacheError =
-  | "KEY_ALREADY_EXISTS"
-  | "KEY_NOT_FOUND"
-  | "CAPACITY_EXCEEDED";
-
-export type CommandResult =
-  | { readonly ok: true }
-  | { readonly ok: false; readonly error: CacheError };
-
-export type ReadResult =
-  | { readonly ok: true; readonly value: string }
-  | { readonly ok: false; readonly error: "KEY_NOT_FOUND" };
+import type {
+  CacheStats,
+  CommandResult,
+  ReadResult
+} from "../../domain/cache-types.js";
 
 interface Entry {
   readonly key: string;
   value: string;
   next: Entry | undefined;
-}
-
-export interface CacheStats {
-  readonly entryCount: number;
-  readonly usedBytes: number;
-  readonly maxBytes: number;
-  readonly bucketCount: number;
-  readonly collisionCount: number;
-  readonly resizeCount: number;
-}
-
-export interface CacheStore {
-  create(key: string, value: string): CommandResult;
-  get(key: string): ReadResult;
-  update(key: string, value: string): CommandResult;
-  delete(key: string): CommandResult;
-  getStats(): CacheStats;
 }
 
 const INITIAL_BUCKET_COUNT = 16;
@@ -46,7 +22,7 @@ export function djb2(key: string): number {
   return hash >>> 0;
 }
 
-export class CustomHashTable implements CacheStore {
+export class CustomHashTable {
   private buckets: Array<Entry | undefined> = new Array<Entry | undefined>(
     INITIAL_BUCKET_COUNT
   );

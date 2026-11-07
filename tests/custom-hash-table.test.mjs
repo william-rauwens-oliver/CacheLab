@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { CustomHashTable, djb2 } from "../dist/storage/custom-hash-table.js";
+import {
+  CustomHashTable,
+  djb2
+} from "../dist/engine/hash-table/custom-hash-table.js";
 
 test("supports the CRUD lifecycle", () => {
   const cache = new CustomHashTable(1024);

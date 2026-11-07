@@ -1,6 +1,8 @@
 export interface RuntimeConfig {
   readonly cacheMaxBytes: number;
+  readonly corsOrigins: readonly string[];
   readonly host: string;
+  readonly httpBodyLimit: string;
   readonly port: number;
 }
 
@@ -23,13 +25,24 @@ export function loadRuntimeConfig(environment: Environment): RuntimeConfig {
   if (port > 65_535) {
     throw new Error("PORT must be between 1 and 65535");
   }
+  const httpBodyLimit = environment.HTTP_BODY_LIMIT ?? "1mb";
+  if (httpBodyLimit.trim() === "") {
+    throw new Error("HTTP_BODY_LIMIT must not be empty");
+  }
 
   return Object.freeze({
     cacheMaxBytes: positiveInteger(
       environment.CACHE_MAX_BYTES,
       "CACHE_MAX_BYTES"
     ),
+    corsOrigins: Object.freeze(
+      (environment.CORS_ORIGINS ?? "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0)
+    ),
     host: environment.HOST ?? "127.0.0.1",
+    httpBodyLimit,
     port
   });
 }

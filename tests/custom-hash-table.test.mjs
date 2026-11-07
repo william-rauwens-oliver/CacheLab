@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { CustomHashTable, djb2 } from "../dist/custom-hash-table.js";
+import { CustomHashTable, djb2 } from "../dist/storage/custom-hash-table.js";
 
 test("supports the CRUD lifecycle", () => {
   const cache = new CustomHashTable(1024);
@@ -59,4 +59,16 @@ test("resizes on the thirteenth insertion", () => {
   assert.equal(cache.getStats().bucketCount, 32);
   assert.equal(cache.getStats().resizeCount, 1);
   assert.deepEqual(cache.get("key-12"), { ok: true, value: "value-12" });
+});
+
+test("starts empty after a restart", () => {
+  const runningCache = new CustomHashTable(1024);
+  runningCache.create("temporary", "value");
+
+  const restartedCache = new CustomHashTable(1024);
+  assert.deepEqual(restartedCache.get("temporary"), {
+    ok: false,
+    error: "KEY_NOT_FOUND"
+  });
+  assert.equal(restartedCache.getStats().entryCount, 0);
 });

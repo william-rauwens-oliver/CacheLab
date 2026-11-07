@@ -26,6 +26,14 @@ export interface CacheStats {
   readonly resizeCount: number;
 }
 
+export interface CacheStore {
+  create(key: string, value: string): CommandResult;
+  get(key: string): ReadResult;
+  update(key: string, value: string): CommandResult;
+  delete(key: string): CommandResult;
+  getStats(): CacheStats;
+}
+
 const INITIAL_BUCKET_COUNT = 16;
 const MAX_LOAD_FACTOR = 0.75;
 const textEncoder = new TextEncoder();
@@ -38,7 +46,7 @@ export function djb2(key: string): number {
   return hash >>> 0;
 }
 
-export class CustomHashTable {
+export class CustomHashTable implements CacheStore {
   private buckets: Array<Entry | undefined> = new Array<Entry | undefined>(
     INITIAL_BUCKET_COUNT
   );

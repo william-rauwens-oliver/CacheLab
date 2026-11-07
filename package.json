@@ -1,0 +1,19 @@
+{
+  "name": "cachelab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Custom in-memory key/value storage engine",
+  "type": "module",
+  "main": "dist/custom-hash-table.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "check": "npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

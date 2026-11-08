@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createHttpApp } from "../dist/adapters/http/create-http-app.js";
+import { createCacheLab } from "../dist/app.js";
 
 const config = {
   cacheMaxBytes: 1024,
@@ -12,7 +12,7 @@ const config = {
 };
 
 test("starts, answers health checks and stops cleanly", async () => {
-  const server = createHttpApp(config).listen(0, "127.0.0.1");
+  const server = createCacheLab(config).app.listen(0, "127.0.0.1");
   await new Promise((resolve) => server.once("listening", resolve));
 
   const address = server.address();
@@ -30,7 +30,7 @@ test("starts, answers health checks and stops cleanly", async () => {
 });
 
 test("does not expose unknown routes", async () => {
-  const server = createHttpApp(config).listen(0, "127.0.0.1");
+  const server = createCacheLab(config).app.listen(0, "127.0.0.1");
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   assert.equal(typeof address, "object");

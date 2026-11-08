@@ -17,7 +17,17 @@ Implemented:
 - safe default binding to `127.0.0.1`.
 - separated application ports, adapters, configuration and storage engine;
 
-Not implemented yet: CRUD HTTP endpoints, logging, metrics, OpenAPI, Docker, CI and benchmarks.
+Implemented API endpoints:
+
+| Method | Path | Success |
+|---|---|---|
+| `POST` | `/api/v1/keys` | `201` |
+| `GET` | `/api/v1/keys/:key` | `200` |
+
+POST expects a JSON body containing a non-empty string `key` and a string
+`value`. GET returns `{ "key": string, "value": string }`.
+
+Not implemented yet: PUT, DELETE, logging, metrics, OpenAPI, Docker, CI and benchmarks.
 
 ```bash
 npm install

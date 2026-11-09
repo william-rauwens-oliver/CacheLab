@@ -16,8 +16,10 @@ Implemented:
 - external capacity and network configuration;
 - safe default binding to `127.0.0.1`.
 - separated application ports, adapters, configuration and storage engine;
+- `PUT /api/v1/keys/:key` with atomic value replacement and validation.
 
-Not implemented yet: CRUD HTTP endpoints, logging, metrics, OpenAPI, Docker, CI and benchmarks.
+Not implemented yet: the create, read, delete and list HTTP endpoints, logging,
+metrics, OpenAPI, Docker, CI and benchmarks.
 
 ```bash
 npm install

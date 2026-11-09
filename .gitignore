@@ -1,0 +1,60 @@
+
+# ==========================================
+# CacheLab - Git Ignore
+# ==========================================
+
+# Dépendances Node.js
+node_modules/
+
+# Fichiers compilés TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# Variables d'environnement et secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Couverture des tests
+coverage/
+.nyc_output/
+
+# Résultats des tests et benchmarks
+test-results/
+playwright-report/
+benchmark-results/
+
+# Fichiers temporaires
+tmp/
+temp/
+.cache/
+*.tmp
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Fichiers locaux
+*.local
+
+# Docs locales
+/docs/local/

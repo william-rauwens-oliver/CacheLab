@@ -27,7 +27,6 @@ public Internet.
 
 ```bash
 npm ci
-cp -n .env.example .env
 set -a
 source .env
 set +a

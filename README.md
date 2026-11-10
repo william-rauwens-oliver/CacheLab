@@ -18,8 +18,17 @@ Implemented:
 - separated application ports, adapters, configuration and storage engine;
 - `POST /api/v1/keys` with strict input validation and documented errors.
 
-Not implemented yet: the read, update, delete and list HTTP endpoints, logging,
-metrics, OpenAPI, Docker, CI and benchmarks.
+Implemented API endpoints:
+
+| Method | Path | Success |
+|---|---|---|
+| `POST` | `/api/v1/keys` | `201` |
+| `GET` | `/api/v1/keys/:key` | `200` |
+
+POST expects a JSON body containing a non-empty string `key` and a string
+`value`. GET returns `{ "key": string, "value": string }`.
+
+Not implemented yet: PUT, DELETE, logging, metrics, OpenAPI, Docker, CI and benchmarks.
 
 ```bash
 npm install

@@ -25,6 +25,22 @@ export function validateCreateBody(
   return { ok: true, value: { key: body.key, value: body.value } };
 }
 
+export function validateUpdateBody(
+  body: unknown
+): ValidationResult<{ value: string }> {
+  if (!isRecord(body)) {
+    return { ok: false, message: "Body must be a JSON object" };
+  }
+  const fields = Object.keys(body);
+  if (fields.length !== 1 || fields[0] !== "value") {
+    return { ok: false, message: "Body must only contain value" };
+  }
+  if (typeof body.value !== "string") {
+    return { ok: false, message: "value must be a string" };
+  }
+  return { ok: true, value: { value: body.value } };
+}
+
 export function validateRouteKey(key: unknown): ValidationResult<string> {
   if (typeof key !== "string" || key.length === 0) {
     return { ok: false, message: "key must be a non-empty string" };

@@ -17,6 +17,7 @@ Implemented:
 - safe default binding to `127.0.0.1`.
 - separated application ports, adapters, configuration and storage engine;
 - `POST /api/v1/keys` with strict input validation and documented errors.
+- `PUT /api/v1/keys/:key` with atomic value replacement and validation.
 
 Implemented API endpoints:
 
@@ -24,11 +25,13 @@ Implemented API endpoints:
 |---|---|---|
 | `POST` | `/api/v1/keys` | `201` |
 | `GET` | `/api/v1/keys/:key` | `200` |
+| `PUT` | `/api/v1/keys/:key` | `204` |
 
 POST expects a JSON body containing a non-empty string `key` and a string
-`value`. GET returns `{ "key": string, "value": string }`.
+`value`. GET returns `{ "key": string, "value": string }`. PUT expects a JSON
+body containing only a string `value`.
 
-Not implemented yet: PUT, DELETE, logging, metrics, OpenAPI, Docker, CI and benchmarks.
+Not implemented yet: DELETE, logging, metrics, OpenAPI, Docker, CI and benchmarks.
 
 ```bash
 npm install

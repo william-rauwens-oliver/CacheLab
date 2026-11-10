@@ -12,6 +12,7 @@ import {
   validateRouteKey,
   validateUpdateBody
 } from "./validation.js";
+import { registerOpenApiDocumentation } from "./openapi.js";
 
 export interface HttpDependencies {
   readonly createEntry: CreateCacheEntry;
@@ -43,6 +44,10 @@ export function createHttpApp(
     })
   );
   app.use(express.json({ limit: config.httpBodyLimit, strict: true }));
+
+  if (config.docsEnabled) {
+    registerOpenApiDocumentation(app);
+  }
 
   app.get("/health", (_request, response) => {
     response.status(200).json({ status: "ok" });

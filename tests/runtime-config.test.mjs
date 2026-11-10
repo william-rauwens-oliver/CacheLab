@@ -8,6 +8,7 @@ test("loads external configuration with safe network defaults", () => {
   assert.deepEqual(config, {
     cacheMaxBytes: 1024,
     corsOrigins: [],
+    docsEnabled: false,
     host: "127.0.0.1",
     httpBodyLimit: "1mb",
     port: 3000
@@ -18,6 +19,7 @@ test("accepts explicit network configuration", () => {
   const config = loadRuntimeConfig({
     CACHE_MAX_BYTES: "2048",
     CORS_ORIGINS: "https://one.example, https://two.example",
+    DOCS_ENABLED: "true",
     HOST: "0.0.0.0",
     HTTP_BODY_LIMIT: "2mb",
     PORT: "8080"
@@ -27,6 +29,7 @@ test("accepts explicit network configuration", () => {
     "https://one.example",
     "https://two.example"
   ]);
+  assert.equal(config.docsEnabled, true);
   assert.equal(config.host, "0.0.0.0");
   assert.equal(config.httpBodyLimit, "2mb");
   assert.equal(config.port, 8080);
@@ -41,5 +44,9 @@ test("rejects missing or invalid configuration", () => {
   assert.throws(
     () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HTTP_BODY_LIMIT: "" }),
     /HTTP_BODY_LIMIT/
+  );
+  assert.throws(
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", DOCS_ENABLED: "yes" }),
+    /DOCS_ENABLED/
   );
 });

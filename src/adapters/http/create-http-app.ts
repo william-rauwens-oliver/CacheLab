@@ -1,22 +1,24 @@
 import cors from "cors";
-import express from "express";
+import express, { type ErrorRequestHandler, type Response } from "express";
 import helmet from "helmet";
 
-import type { UpdateCacheEntry } from "../../application/use-cases/update-cache-entry.js";
+import type { CreateCacheEntry } from "../../application/use-cases/create-cache-entry.js";
+import type { GetCacheEntry } from "../../application/use-cases/get-cache-entry.js";
 import type { RuntimeConfig } from "../../config/runtime-config.js";
-import { validateUpdateEntryInput } from "./validation.js";
+import { validateCreateBody, validateRouteKey } from "./validation.js";
 
-interface HttpDependencies {
-  readonly updateEntry: UpdateCacheEntry;
+export interface HttpDependencies {
+  readonly createEntry: CreateCacheEntry;
+  readonly getEntry: GetCacheEntry;
 }
 
 function sendError(
-  response: express.Response,
+  response: Response,
   status: number,
   code: string,
   message: string
 ) {
-  response.status(status).json({ error: { code, message } });
+  return response.status(status).json({ error: { code, message } });
 }
 
 export function createHttpApp(
@@ -38,74 +40,59 @@ export function createHttpApp(
     response.status(200).json({ status: "ok" });
   });
 
-  app.put("/api/v1/keys/:key", (request, response) => {
-    const input = validateUpdateEntryInput(request.body);
-    if (input === undefined) {
-      sendError(
-        response,
-        400,
-        "VALIDATION_ERROR",
-        "Body must contain only a string value"
-      );
-      return;
+  app.post("/api/v1/keys", (request, response) => {
+    const validation = validateCreateBody(request.body);
+    if (!validation.ok) {
+      return sendError(response, 400, "VALIDATION_ERROR", validation.message);
     }
 
-    const result = dependencies.updateEntry.execute(
-      request.params.key,
-      input.value
+    const result = dependencies.createEntry.execute(
+      validation.value.key,
+      validation.value.value
     );
-    if (result.ok) {
-      response.status(204).end();
-      return;
+    if (!result.ok && result.error === "KEY_ALREADY_EXISTS") {
+      return sendError(response, 409, result.error, "Key already exists");
+    }
+    if (!result.ok && result.error === "CAPACITY_EXCEEDED") {
+      return sendError(response, 507, result.error, "Cache capacity exceeded");
+    }
+    return response.status(201).send();
+  });
+
+  app.get("/api/v1/keys/:key", (request, response) => {
+    const validation = validateRouteKey(request.params.key);
+    if (!validation.ok) {
+      return sendError(response, 400, "VALIDATION_ERROR", validation.message);
     }
 
-    if (result.error === "KEY_NOT_FOUND") {
-      sendError(response, 404, result.error, "Key not found");
-      return;
+    const result = dependencies.getEntry.execute(validation.value);
+    if (!result.ok) {
+      return sendError(response, 404, result.error, "Key not found");
     }
-
-    sendError(response, 507, result.error, "Cache capacity exceeded");
+    return response.status(200).json({ key: validation.value, value: result.value });
   });
 
   app.use((_request, response) => {
     sendError(response, 404, "ROUTE_NOT_FOUND", "Route not found");
   });
 
-  app.use(
-    (
-      error: unknown,
-      _request: express.Request,
-      response: express.Response,
-      _next: express.NextFunction
-    ) => {
-      if (error instanceof SyntaxError) {
-        sendError(
-          response,
-          400,
-          "INVALID_JSON",
-          "Request body contains invalid JSON"
-        );
-        return;
-      }
-
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "type" in error &&
-        error.type === "entity.too.large"
-      ) {
-        sendError(
-          response,
-          413,
-          "PAYLOAD_TOO_LARGE",
-          "Request body is too large"
-        );
-        return;
-      }
-
-      sendError(response, 500, "INTERNAL_ERROR", "Internal server error");
+  const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+    if (error instanceof SyntaxError) {
+      sendError(response, 400, "INVALID_JSON", "Request body contains invalid JSON");
+      return;
     }
-  );
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "type" in error &&
+      error.type === "entity.too.large"
+    ) {
+      sendError(response, 413, "PAYLOAD_TOO_LARGE", "Request body is too large");
+      return;
+    }
+    sendError(response, 500, "INTERNAL_ERROR", "Internal server error");
+  };
+  app.use(errorHandler);
 
   return app;
 }

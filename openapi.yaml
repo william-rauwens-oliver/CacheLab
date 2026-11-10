@@ -1,0 +1,247 @@
+openapi: 3.1.0
+info:
+  title: CacheLab API
+  version: 0.1.0
+  description: |
+    REST API for CacheLab, an in-memory and volatile string key/value cache.
+    Stored data is lost whenever the process stops or restarts.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local development server
+tags:
+  - name: Cache entries
+    description: Create, read, update and delete string key/value entries.
+security: []
+paths:
+  /api/v1/keys:
+    post:
+      tags:
+        - Cache entries
+      summary: Create a cache entry
+      operationId: createCacheEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEntryRequest"
+            examples:
+              productPrice:
+                summary: Store a product price
+                value:
+                  key: product:42:price
+                  value: "19.99"
+      responses:
+        "201":
+          description: Entry created successfully. The response has no body.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: The key already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: KEY_ALREADY_EXISTS
+                  message: Key already exists
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "507":
+          $ref: "#/components/responses/CapacityExceeded"
+  /api/v1/keys/{key}:
+    parameters:
+      - $ref: "#/components/parameters/CacheKey"
+    get:
+      tags:
+        - Cache entries
+      summary: Read a cache entry
+      operationId: getCacheEntry
+      responses:
+        "200":
+          description: The requested cache entry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CacheEntry"
+              example:
+                key: product:42:price
+                value: "19.99"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/KeyNotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    put:
+      tags:
+        - Cache entries
+      summary: Update a cache entry
+      operationId: updateCacheEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEntryRequest"
+            examples:
+              productPrice:
+                summary: Replace a product price
+                value:
+                  value: "24.99"
+      responses:
+        "204":
+          description: Entry updated successfully. The response has no body.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/KeyNotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "507":
+          $ref: "#/components/responses/CapacityExceeded"
+    delete:
+      tags:
+        - Cache entries
+      summary: Delete a cache entry
+      operationId: deleteCacheEntry
+      responses:
+        "204":
+          description: Entry deleted successfully. The response has no body.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/KeyNotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+components:
+  parameters:
+    CacheKey:
+      name: key
+      in: path
+      required: true
+      description: |
+        Non-empty cache key. Reserved URL characters must be percent-encoded by
+        the client. The decoded value is used without normalization.
+      schema:
+        type: string
+        minLength: 1
+      example: product:42:price
+  schemas:
+    CacheEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          minLength: 1
+        value:
+          type: string
+    CreateEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          minLength: 1
+          description: Cache key. Keys are stored without normalization.
+        value:
+          type: string
+          description: Cache value. Empty strings are accepted.
+    UpdateEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: Replacement value. Empty strings are accepted.
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+  responses:
+    ValidationError:
+      description: The request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalidField:
+              value:
+                error:
+                  code: VALIDATION_ERROR
+                  message: value must be a string
+            invalidJson:
+              value:
+                error:
+                  code: INVALID_JSON
+                  message: Request body contains invalid JSON
+    KeyNotFound:
+      description: The key does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: KEY_NOT_FOUND
+              message: Key not found
+    PayloadTooLarge:
+      description: The HTTP request body exceeds HTTP_BODY_LIMIT.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: PAYLOAD_TOO_LARGE
+              message: Request body is too large
+    CapacityExceeded:
+      description: The operation would exceed CACHE_MAX_BYTES.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: CAPACITY_EXCEEDED
+              message: Cache capacity exceeded
+    InternalError:
+      description: An unexpected technical error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: Internal server error

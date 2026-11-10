@@ -1,6 +1,7 @@
 export interface RuntimeConfig {
   readonly cacheMaxBytes: number;
   readonly corsOrigins: readonly string[];
+  readonly docsEnabled: boolean;
   readonly host: string;
   readonly httpBodyLimit: string;
   readonly port: number;
@@ -18,6 +19,17 @@ function positiveInteger(value: string | undefined, name: string): number {
     throw new Error(`${name} must be a positive safe integer`);
   }
   return parsed;
+}
+
+function booleanValue(value: string | undefined, name: string): boolean {
+  const normalized = value?.trim().toLowerCase() ?? "false";
+  if (normalized === "true") {
+    return true;
+  }
+  if (normalized === "false") {
+    return false;
+  }
+  throw new Error(`${name} must be true or false`);
 }
 
 export function loadRuntimeConfig(environment: Environment): RuntimeConfig {
@@ -41,6 +53,7 @@ export function loadRuntimeConfig(environment: Environment): RuntimeConfig {
         .map((origin) => origin.trim())
         .filter((origin) => origin.length > 0)
     ),
+    docsEnabled: booleanValue(environment.DOCS_ENABLED, "DOCS_ENABLED"),
     host: environment.HOST ?? "127.0.0.1",
     httpBodyLimit,
     port

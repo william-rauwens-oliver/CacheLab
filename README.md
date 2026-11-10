@@ -16,6 +16,7 @@ Implemented:
 - external capacity and network configuration;
 - safe default binding to `127.0.0.1`.
 - separated application ports, adapters, configuration and storage engine;
+- `POST /api/v1/keys` with strict input validation and documented errors.
 
 Implemented API endpoints:
 

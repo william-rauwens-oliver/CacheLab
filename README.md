@@ -1,26 +1,11 @@
 # CacheLab
 
-CacheLab is a TypeScript backend for an in-memory key/value cache.
+CacheLab is a TypeScript and Express service that stores string key/value pairs
+in memory. Its custom hash table supports collision handling, automatic resize,
+UTF-8 capacity accounting and atomic CRUD operations without using `Map` as the
+storage engine.
 
-Implemented:
-
-- custom hash table without using `Map` as storage;
-- `djb2` hashing;
-- collision handling with separate chaining;
-- synchronous create, read, update and delete operations;
-- exported `CacheStore` contract hiding the storage implementation;
-- UTF-8 capacity limit;
-- automatic resize above a `0.75` load factor;
-- unit tests using the Node.js test runner.
-- Express HTTP adapter with a `GET /health` endpoint;
-- external capacity and network configuration;
-- safe default binding to `127.0.0.1`.
-- separated application ports, adapters, configuration and storage engine;
-- `POST /api/v1/keys` with strict input validation and documented errors.
-- `PUT /api/v1/keys/:key` with atomic value replacement and validation.
-- `DELETE /api/v1/keys/:key` with explicit not-found handling.
-
-Implemented API endpoints:
+## API
 
 | Method | Path | Success |
 |---|---|---|
@@ -29,27 +14,44 @@ Implemented API endpoints:
 | `PUT` | `/api/v1/keys/:key` | `204` |
 | `DELETE` | `/api/v1/keys/:key` | `204` |
 
-POST expects a JSON body containing a non-empty string `key` and a string
-`value`. GET returns `{ "key": string, "value": string }`. PUT expects a JSON
-body containing only a string `value`.
+The versioned OpenAPI 3.1 contract is in [`openapi.yaml`](openapi.yaml). When
+`DOCS_ENABLED=true`, the running service exposes:
 
-Not implemented yet: listing keys, logging, metrics, OpenAPI, Docker, CI and benchmarks.
+- Swagger UI at `http://127.0.0.1:3000/docs/`;
+- the source contract at `http://127.0.0.1:3000/openapi.yaml`.
 
-```bash
-npm install
-npm test
-```
+Documentation is disabled by default and must not be exposed directly to the
+public Internet.
 
-Start the backend:
+## Quick start
 
 ```bash
-cp .env.example .env
+npm ci
+cp -n .env.example .env
 set -a
 source .env
 set +a
-npm run build
+npm run check
 npm start
 ```
 
-Configuration is read from the environment. `CACHE_MAX_BYTES` is required;
-`HOST` defaults to `127.0.0.1`, `PORT` to `3000`, and request bodies to `1mb`.
+`CACHE_MAX_BYTES` is required. The example configuration starts a local-only
+service on `127.0.0.1:3000` with a logical cache capacity of 1 MiB.
+
+## Project guides
+
+- [LIV-008 - Installation and startup](docs/installation.md)
+- [LIV-009 - Configuration and operations](docs/operations.md)
+
+## Useful commands
+
+| Command | Purpose |
+|---|---|
+| `npm run build` | Compile TypeScript into `dist/` |
+| `npm test` | Compile and run the automated tests |
+| `npm run openapi:lint` | Validate and lint `openapi.yaml` |
+| `npm run check` | Validate OpenAPI, compile and run all tests |
+| `npm start` | Run the compiled service |
+
+Not implemented yet: key listing, structured logging, metrics, Docker, CI and
+benchmarks.

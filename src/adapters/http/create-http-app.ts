@@ -3,13 +3,21 @@ import express, { type ErrorRequestHandler, type Response } from "express";
 import helmet from "helmet";
 
 import type { CreateCacheEntry } from "../../application/use-cases/create-cache-entry.js";
+import type { DeleteCacheEntry } from "../../application/use-cases/delete-cache-entry.js";
 import type { GetCacheEntry } from "../../application/use-cases/get-cache-entry.js";
+import type { UpdateCacheEntry } from "../../application/use-cases/update-cache-entry.js";
 import type { RuntimeConfig } from "../../config/runtime-config.js";
-import { validateCreateBody, validateRouteKey } from "./validation.js";
+import {
+  validateCreateBody,
+  validateRouteKey,
+  validateUpdateBody
+} from "./validation.js";
 
 export interface HttpDependencies {
   readonly createEntry: CreateCacheEntry;
+  readonly deleteEntry: DeleteCacheEntry;
   readonly getEntry: GetCacheEntry;
+  readonly updateEntry: UpdateCacheEntry;
 }
 
 function sendError(
@@ -70,6 +78,53 @@ export function createHttpApp(
       return sendError(response, 404, result.error, "Key not found");
     }
     return response.status(200).json({ key: validation.value, value: result.value });
+  });
+
+  app.put("/api/v1/keys/:key", (request, response) => {
+    const keyValidation = validateRouteKey(request.params.key);
+    if (!keyValidation.ok) {
+      return sendError(
+        response,
+        400,
+        "VALIDATION_ERROR",
+        keyValidation.message
+      );
+    }
+
+    const bodyValidation = validateUpdateBody(request.body);
+    if (!bodyValidation.ok) {
+      return sendError(
+        response,
+        400,
+        "VALIDATION_ERROR",
+        bodyValidation.message
+      );
+    }
+
+    const result = dependencies.updateEntry.execute(
+      keyValidation.value,
+      bodyValidation.value.value
+    );
+    if (!result.ok && result.error === "KEY_NOT_FOUND") {
+      return sendError(response, 404, result.error, "Key not found");
+    }
+    if (!result.ok && result.error === "CAPACITY_EXCEEDED") {
+      return sendError(response, 507, result.error, "Cache capacity exceeded");
+    }
+    return response.status(204).send();
+  });
+
+  app.delete("/api/v1/keys/:key", (request, response) => {
+    const validation = validateRouteKey(request.params.key);
+    if (!validation.ok) {
+      return sendError(response, 400, "VALIDATION_ERROR", validation.message);
+    }
+
+    const result = dependencies.deleteEntry.execute(validation.value);
+    if (!result.ok) {
+      return sendError(response, 404, result.error, "Key not found");
+    }
+    return response.status(204).send();
   });
 
   app.use((_request, response) => {

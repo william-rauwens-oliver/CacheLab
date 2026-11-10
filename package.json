@@ -10,7 +10,8 @@
     "openapi:lint": "redocly lint --config redocly.yaml openapi.yaml",
     "start": "node dist/main.js",
     "test": "npm run build && node --test tests/*.test.mjs",
-    "check": "npm run openapi:lint && npm test"
+    "check": "npm run openapi:lint && npm test",
+    "launch": "npm ci && bash -c 'set -a; source .env; set +a; npm run check; npm start'"
   },
   "engines": {
     "node": ">=22.12.0",

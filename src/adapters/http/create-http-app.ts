@@ -53,6 +53,18 @@ export function createHttpApp(
     response.status(200).json({ status: "ok" });
   });
 
+  app.get("/", (_request, response) => {
+    if (config.docsEnabled) {
+      return response.redirect(302, "/docs/");
+    }
+
+    return response.status(200).json({
+      name: "CacheLab",
+      status: "ok",
+      apiBasePath: "/api/v1"
+    });
+  });
+
   app.post("/api/v1/keys", (request, response) => {
     const validation = validateCreateBody(request.body);
     if (!validation.ok) {

@@ -61,6 +61,15 @@ test("serves Swagger UI when documentation is enabled", async (context) => {
   assert.match(html, /swagger-ui-bundle\.js/);
 });
 
+test("redirects the root route to Swagger when documentation is enabled", async (context) => {
+  const server = await start();
+  context.after(server.close);
+
+  const response = await fetch(`${server.baseUrl}/`, { redirect: "manual" });
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "/docs/");
+});
+
 test("does not expose documentation by default", async (context) => {
   const server = await start({ ...baseConfig, docsEnabled: false });
   context.after(server.close);

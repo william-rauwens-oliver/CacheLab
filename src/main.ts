@@ -1,9 +1,12 @@
+import pino from "pino";
+
 import { loadRuntimeConfig } from "./config/runtime-config.js";
 import { createCacheLab } from "./app.js";
 
 try {
   const config = loadRuntimeConfig(process.env);
-  const { app, engine } = createCacheLab(config);
+  const logger = pino();
+  const { app, engine } = createCacheLab(config, { logger });
   const server = app.listen(config.port, config.host, () => {
     console.info(`CacheLab listening on http://${config.host}:${config.port}`);
     console.info(`Cache capacity: ${engine.getStats().maxBytes} bytes`);

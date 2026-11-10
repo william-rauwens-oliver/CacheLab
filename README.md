@@ -26,16 +26,13 @@ public Internet.
 ## Quick start
 
 ```bash
-npm ci
-set -a
-source .env
-set +a
-npm run check
-npm start
+npm run launch
 ```
 
 `CACHE_MAX_BYTES` is required. The example configuration starts a local-only
 service on `127.0.0.1:3000` with a logical cache capacity of 1 MiB.
+The launch command installs locked dependencies, loads `.env`, validates the
+project and starts the service.
 
 ## Project guides
 
@@ -50,6 +47,7 @@ service on `127.0.0.1:3000` with a logical cache capacity of 1 MiB.
 | `npm test` | Compile and run the automated tests |
 | `npm run openapi:lint` | Validate and lint `openapi.yaml` |
 | `npm run check` | Validate OpenAPI, compile and run all tests |
+| `npm run launch` | Install, load `.env`, validate and start the service |
 | `npm start` | Run the compiled service |
 
 Not implemented yet: key listing, structured logging, metrics, Docker, CI and

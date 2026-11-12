@@ -11,7 +11,8 @@ test("loads external configuration with safe network defaults", () => {
     docsEnabled: false,
     host: "127.0.0.1",
     httpBodyLimit: "1mb",
-    port: 3000
+    port: 3000,
+    shutdownTimeoutMs: 10000
   });
 });
 
@@ -22,7 +23,8 @@ test("accepts explicit network configuration", () => {
     DOCS_ENABLED: "true",
     HOST: "0.0.0.0",
     HTTP_BODY_LIMIT: "2mb",
-    PORT: "8080"
+    PORT: "8080",
+    SHUTDOWN_TIMEOUT_MS: "2500"
   });
   assert.equal(config.cacheMaxBytes, 2048);
   assert.deepEqual(config.corsOrigins, [
@@ -33,6 +35,7 @@ test("accepts explicit network configuration", () => {
   assert.equal(config.host, "0.0.0.0");
   assert.equal(config.httpBodyLimit, "2mb");
   assert.equal(config.port, 8080);
+  assert.equal(config.shutdownTimeoutMs, 2500);
 });
 
 test("rejects missing or invalid configuration", () => {
@@ -65,6 +68,16 @@ test("rejects missing or invalid configuration", () => {
     () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", DOCS_ENABLED: "yes" }),
     /DOCS_ENABLED.*yes/
   );
+  for (const value of ["0", "-1", "1.5", "not-a-number"]) {
+    assert.throws(
+      () =>
+        loadRuntimeConfig({
+          CACHE_MAX_BYTES: "1024",
+          SHUTDOWN_TIMEOUT_MS: value
+        }),
+      /SHUTDOWN_TIMEOUT_MS/
+    );
+  }
 });
 
 test("normalizes valid body limits and hosts", () => {

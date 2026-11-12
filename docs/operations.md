@@ -13,6 +13,7 @@ validated at startup and remains fixed until the next restart.
 | `HTTP_BODY_LIMIT` | `1mb` | Positive size followed by `b`, `kb`, `mb`, `gb`, `tb` or `pb` |
 | `CORS_ORIGINS` | Empty | Comma-separated list of allowed browser origins |
 | `DOCS_ENABLED` | `false` | Exposes `/docs` and `/openapi.yaml` when `true` |
+| `SHUTDOWN_TIMEOUT_MS` | `10000` | Positive maximum graceful-shutdown delay in milliseconds |
 
 Invalid values prevent the service from starting with a non-zero exit code. The
 error names the invalid variable and received value. `.env` is local and
@@ -52,8 +53,10 @@ environment and apply the same network restrictions as the API.
 ## Stop and restart
 
 Send `SIGINT` (`Ctrl+C`) or `SIGTERM` to request a clean HTTP server shutdown.
-Wait for the Node.js process to exit before starting another instance on the
-same port.
+The server immediately stops accepting new connections and waits for active
+connections to finish. After `SHUTDOWN_TIMEOUT_MS`, any remaining connections
+are destroyed so the process can exit. With no active request, shutdown is
+immediate and does not wait for the configured timeout.
 
 Restart with the same validated sequence:
 
@@ -64,9 +67,6 @@ set +a
 npm run build
 npm start
 ```
-
-The current implementation waits for the Node.js HTTP server to close; it does
-not yet enforce a configurable forced-shutdown timeout.
 
 ## Volatile storage
 

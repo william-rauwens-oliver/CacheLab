@@ -8,14 +8,16 @@ validated at startup and remains fixed until the next restart.
 | Variable | Default | Description |
 |---|---:|---|
 | `CACHE_MAX_BYTES` | Required | Maximum logical cache capacity in UTF-8 bytes |
-| `HOST` | `127.0.0.1` | Network address used by the HTTP server |
+| `HOST` | `127.0.0.1` | Non-empty network address used by the HTTP server |
 | `PORT` | `3000` | HTTP listening port, from 1 to 65535 |
-| `HTTP_BODY_LIMIT` | `1mb` | Maximum JSON request body size |
+| `HTTP_BODY_LIMIT` | `1mb` | Positive size followed by `b`, `kb`, `mb`, `gb`, `tb` or `pb` |
 | `CORS_ORIGINS` | Empty | Comma-separated list of allowed browser origins |
 | `DOCS_ENABLED` | `false` | Exposes `/docs` and `/openapi.yaml` when `true` |
 
-Invalid values prevent the service from starting. `.env` is local and ignored
-by Git; `.env.example` is the versioned reference and contains no secrets.
+Invalid values prevent the service from starting with a non-zero exit code. The
+error names the invalid variable and received value. `.env` is local and
+ignored by Git; `.env.example` is the versioned reference and contains no
+secrets.
 
 ## Capacity and memory
 

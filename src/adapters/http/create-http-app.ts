@@ -149,6 +149,15 @@ export function createHttpApp(
   });
 
   const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+    if (error instanceof URIError) {
+      sendError(
+        response,
+        400,
+        "VALIDATION_ERROR",
+        "URL contains invalid percent-encoding"
+      );
+      return;
+    }
     if (error instanceof SyntaxError) {
       sendError(response, 400, "INVALID_JSON", "Request body contains invalid JSON");
       return;

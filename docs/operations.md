@@ -11,7 +11,7 @@ validated at startup and remains fixed until the next restart.
 | `HOST` | `127.0.0.1` | Non-empty network address used by the HTTP server |
 | `PORT` | `3000` | HTTP listening port, from 1 to 65535 |
 | `HTTP_BODY_LIMIT` | `1mb` | Positive size followed by `b`, `kb`, `mb`, `gb`, `tb` or `pb` |
-| `CORS_ORIGINS` | Empty | Comma-separated list of allowed browser origins |
+| `CORS_ALLOWED_ORIGINS` | Empty | Comma-separated list of allowed browser origins |
 | `DOCS_ENABLED` | `false` | Exposes `/docs` and `/openapi.yaml` when `true` |
 | `SHUTDOWN_TIMEOUT_MS` | `10000` | Positive maximum graceful-shutdown delay in milliseconds |
 
@@ -44,8 +44,8 @@ does not currently include authentication and must not be exposed directly to
 the public Internet. Helmet and CORS do not replace network access control or
 HTTPS termination.
 
-Keep `CORS_ORIGINS` empty when browser access is not needed. Otherwise, list
-only explicit trusted origins, separated by commas.
+Keep `CORS_ALLOWED_ORIGINS` empty when browser access is not needed. Otherwise,
+list only explicit trusted origins, separated by commas.
 
 API documentation is disabled by default. Enable it only in an authorized
 environment and apply the same network restrictions as the API.
@@ -79,6 +79,6 @@ the original data source as authoritative and be able to repopulate the cache.
 
 - call `GET /health` to verify that the process answers HTTP requests;
 - run `npm run check` before a release;
-- verify `HOST`, `CORS_ORIGINS` and `DOCS_ENABLED` before external deployment;
+- verify `HOST`, `CORS_ALLOWED_ORIGINS` and `DOCS_ENABLED` before external deployment;
 - size real process memory above `CACHE_MAX_BYTES`;
 - expect an empty cache after every restart.

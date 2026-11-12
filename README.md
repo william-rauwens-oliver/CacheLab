@@ -45,6 +45,7 @@ project and starts the service.
 |---|---|
 | `npm run build` | Compile TypeScript into `dist/` |
 | `npm test` | Compile and run the automated tests |
+| `npm run typecheck:contracts` | Verify operation-specific repository result types |
 | `npm run openapi:lint` | Validate and lint `openapi.yaml` |
 | `npm run check` | Validate OpenAPI, compile and run all tests |
 | `npm run launch` | Install, load `.env`, validate and start the service |

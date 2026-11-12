@@ -62,7 +62,7 @@ async function startService(shutdownTimeoutMs) {
     env: {
       ...process.env,
       CACHE_MAX_BYTES: "1024",
-      CORS_ORIGINS: "",
+      CORS_ALLOWED_ORIGINS: "",
       DOCS_ENABLED: "false",
       HOST: "127.0.0.1",
       HTTP_BODY_LIMIT: "1mb",

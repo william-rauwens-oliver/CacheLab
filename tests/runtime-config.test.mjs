@@ -19,7 +19,7 @@ test("loads external configuration with safe network defaults", () => {
 test("accepts explicit network configuration", () => {
   const config = loadRuntimeConfig({
     CACHE_MAX_BYTES: "2048",
-    CORS_ORIGINS: "https://one.example, https://two.example",
+    CORS_ALLOWED_ORIGINS: "https://one.example, https://two.example",
     DOCS_ENABLED: "true",
     HOST: "0.0.0.0",
     HTTP_BODY_LIMIT: "2mb",
@@ -36,6 +36,22 @@ test("accepts explicit network configuration", () => {
   assert.equal(config.httpBodyLimit, "2mb");
   assert.equal(config.port, 8080);
   assert.equal(config.shutdownTimeoutMs, 2500);
+});
+
+test("ignores empty origins and the retired CORS_ORIGINS variable", () => {
+  const config = loadRuntimeConfig({
+    CACHE_MAX_BYTES: "1024",
+    CORS_ALLOWED_ORIGINS: " , https://allowed.example,  , ",
+    CORS_ORIGINS: "https://retired.example"
+  });
+
+  assert.deepEqual(config.corsOrigins, ["https://allowed.example"]);
+
+  const retiredOnly = loadRuntimeConfig({
+    CACHE_MAX_BYTES: "1024",
+    CORS_ORIGINS: "https://retired.example"
+  });
+  assert.deepEqual(retiredOnly.corsOrigins, []);
 });
 
 test("rejects missing or invalid configuration", () => {

@@ -9,7 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "openapi:lint": "redocly lint --config redocly.yaml openapi.yaml",
     "start": "node dist/main.js",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "typecheck:contracts": "tsc -p tsconfig.type-tests.json",
+    "test": "npm run build && npm run typecheck:contracts && node --test tests/*.test.mjs",
     "check": "npm run openapi:lint && npm test",
     "launch": "npm ci && bash -c 'set -a; source .env; set +a; npm run check; npm start'"
   },

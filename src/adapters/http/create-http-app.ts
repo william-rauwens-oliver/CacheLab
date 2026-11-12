@@ -30,6 +30,10 @@ function sendError(
   return response.status(status).json({ error: { code, message } });
 }
 
+function assertUnreachable(_value: never): never {
+  throw new Error("Unexpected cache error");
+}
+
 export function createHttpApp(
   config: RuntimeConfig,
   dependencies: HttpDependencies
@@ -75,11 +79,15 @@ export function createHttpApp(
       validation.value.key,
       validation.value.value
     );
-    if (!result.ok && result.error === "KEY_ALREADY_EXISTS") {
-      return sendError(response, 409, result.error, "Key already exists");
-    }
-    if (!result.ok && result.error === "CAPACITY_EXCEEDED") {
-      return sendError(response, 507, result.error, "Cache capacity exceeded");
+    if (!result.ok) {
+      switch (result.error) {
+        case "KEY_ALREADY_EXISTS":
+          return sendError(response, 409, result.error, "Key already exists");
+        case "CAPACITY_EXCEEDED":
+          return sendError(response, 507, result.error, "Cache capacity exceeded");
+        default:
+          return assertUnreachable(result.error);
+      }
     }
     return response.status(201).send();
   });
@@ -122,11 +130,15 @@ export function createHttpApp(
       keyValidation.value,
       bodyValidation.value.value
     );
-    if (!result.ok && result.error === "KEY_NOT_FOUND") {
-      return sendError(response, 404, result.error, "Key not found");
-    }
-    if (!result.ok && result.error === "CAPACITY_EXCEEDED") {
-      return sendError(response, 507, result.error, "Cache capacity exceeded");
+    if (!result.ok) {
+      switch (result.error) {
+        case "KEY_NOT_FOUND":
+          return sendError(response, 404, result.error, "Key not found");
+        case "CAPACITY_EXCEEDED":
+          return sendError(response, 507, result.error, "Cache capacity exceeded");
+        default:
+          return assertUnreachable(result.error);
+      }
     }
     return response.status(204).send();
   });

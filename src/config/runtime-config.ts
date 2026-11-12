@@ -5,6 +5,7 @@ export interface RuntimeConfig {
   readonly host: string;
   readonly httpBodyLimit: string;
   readonly port: number;
+  readonly shutdownTimeoutMs: number;
 }
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -89,6 +90,10 @@ export function loadRuntimeConfig(environment: Environment): RuntimeConfig {
     docsEnabled: booleanValue(environment.DOCS_ENABLED, "DOCS_ENABLED"),
     host: hostValue(environment.HOST),
     httpBodyLimit,
-    port
+    port,
+    shutdownTimeoutMs: positiveInteger(
+      environment.SHUTDOWN_TIMEOUT_MS ?? "10000",
+      "SHUTDOWN_TIMEOUT_MS"
+    )
   });
 }

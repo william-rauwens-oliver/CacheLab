@@ -1,7 +1,11 @@
 import type {
   CacheStats,
   CommandResult,
-  ReadResult
+  CreateError,
+  DeleteError,
+  GetError,
+  Result,
+  UpdateError
 } from "../../domain/cache-types.js";
 
 interface Entry {
@@ -37,7 +41,7 @@ export class CustomHashTable {
     }
   }
 
-  public create(key: string, value: string): CommandResult {
+  public create(key: string, value: string): CommandResult<CreateError> {
     if (this.find(key) !== undefined) {
       return { ok: false, error: "KEY_ALREADY_EXISTS" };
     }
@@ -62,14 +66,14 @@ export class CustomHashTable {
     return { ok: true };
   }
 
-  public get(key: string): ReadResult {
+  public get(key: string): Result<string, GetError> {
     const entry = this.find(key);
     return entry === undefined
       ? { ok: false, error: "KEY_NOT_FOUND" }
       : { ok: true, value: entry.value };
   }
 
-  public update(key: string, value: string): CommandResult {
+  public update(key: string, value: string): CommandResult<UpdateError> {
     const entry = this.find(key);
     if (entry === undefined) {
       return { ok: false, error: "KEY_NOT_FOUND" };
@@ -85,7 +89,7 @@ export class CustomHashTable {
     return { ok: true };
   }
 
-  public delete(key: string): CommandResult {
+  public delete(key: string): CommandResult<DeleteError> {
     const index = this.indexFor(key, this.buckets.length);
     let current = this.buckets[index];
     let previous: Entry | undefined;

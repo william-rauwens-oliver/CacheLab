@@ -42,11 +42,38 @@ test("rejects missing or invalid configuration", () => {
     /PORT/
   );
   assert.throws(
-    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HTTP_BODY_LIMIT: "" }),
-    /HTTP_BODY_LIMIT/
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", PORT: "not-a-number" }),
+    /PORT.*not-a-number/
+  );
+  assert.throws(
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HTTP_BODY_LIMIT: "10zz" }),
+    /HTTP_BODY_LIMIT.*10zz/
+  );
+  assert.throws(
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HTTP_BODY_LIMIT: "0mb" }),
+    /HTTP_BODY_LIMIT.*0mb/
+  );
+  assert.throws(
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HOST: "" }),
+    /HOST/
+  );
+  assert.throws(
+    () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", HOST: "   " }),
+    /HOST/
   );
   assert.throws(
     () => loadRuntimeConfig({ CACHE_MAX_BYTES: "1024", DOCS_ENABLED: "yes" }),
-    /DOCS_ENABLED/
+    /DOCS_ENABLED.*yes/
   );
+});
+
+test("normalizes valid body limits and hosts", () => {
+  const config = loadRuntimeConfig({
+    CACHE_MAX_BYTES: "1024",
+    HOST: " 127.0.0.1 ",
+    HTTP_BODY_LIMIT: " 512KB "
+  });
+
+  assert.equal(config.host, "127.0.0.1");
+  assert.equal(config.httpBodyLimit, "512kb");
 });

@@ -82,7 +82,7 @@ export function loadRuntimeConfig(environment: Environment): RuntimeConfig {
       "CACHE_MAX_BYTES"
     ),
     corsOrigins: Object.freeze(
-      (environment.CORS_ORIGINS ?? "")
+      (environment.CORS_ALLOWED_ORIGINS ?? "")
         .split(",")
         .map((origin) => origin.trim())
         .filter((origin) => origin.length > 0)

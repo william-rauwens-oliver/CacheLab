@@ -95,6 +95,7 @@ and `SIGTERM` by asking the HTTP server to close cleanly.
 - `HOST must not be empty`: provide a non-empty listening address.
 - `PORT` errors: use a numeric value from 1 to 65535.
 - `DOCS_ENABLED` errors: use only `true` or `false`.
+- `SHUTDOWN_TIMEOUT_MS` errors: use a strictly positive integer in milliseconds.
 - `EADDRINUSE`: another process is using `PORT`; stop it or select another port.
 - `Cannot find module`: run `npm ci`, then `npm run build` again.
 - Swagger UI returns `404`: set `DOCS_ENABLED=true` and restart CacheLab.

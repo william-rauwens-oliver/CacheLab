@@ -36,6 +36,11 @@ for (const testCase of [
     name: "DOCS_ENABLED",
     environment: { DOCS_ENABLED: "yes" },
     expectedValue: "yes"
+  },
+  {
+    name: "SHUTDOWN_TIMEOUT_MS",
+    environment: { SHUTDOWN_TIMEOUT_MS: "0" },
+    expectedValue: "0"
   }
 ]) {
   test(`refuses startup when ${testCase.name} is invalid`, () => {

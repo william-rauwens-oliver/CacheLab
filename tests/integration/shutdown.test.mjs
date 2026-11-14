@@ -4,7 +4,7 @@ import { once } from "node:events";
 import { createConnection, createServer } from "node:net";
 import test from "node:test";
 
-const projectRoot = new URL("../", import.meta.url);
+const projectRoot = new URL("../../", import.meta.url);
 
 function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));

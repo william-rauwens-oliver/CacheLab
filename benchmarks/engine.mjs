@@ -12,6 +12,7 @@
 import { Bench } from "tinybench";
 
 import { CustomHashTable } from "../dist/engine/hash-table/custom-hash-table.js";
+import { saveResults } from "./save-results.mjs";
 
 const VOLUMES = [10_000, 1_000_000];
 const VALUE = "x".repeat(16);
@@ -176,4 +177,8 @@ for (const volume of VOLUMES) {
   console.log(`Measuring ${volume.toLocaleString("en-US")} entries...`);
   rows.push(...(await measureVolume(volume)));
 }
-console.table(rows);
+saveResults(
+  "engine",
+  { volumes: VOLUMES, valueBytes: VALUE.length, batchSize: BATCH_SIZE, warmupMs: 300, measureMs: 1000 },
+  rows
+);

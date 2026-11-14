@@ -6,7 +6,7 @@ import test from "node:test";
 
 import { parse } from "yaml";
 
-import { createCacheLab } from "../dist/app.js";
+import { createCacheLab } from "../../dist/app.js";
 
 const baseConfig = {
   cacheMaxBytes: 1024,

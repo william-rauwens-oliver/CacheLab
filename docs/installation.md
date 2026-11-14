@@ -68,8 +68,8 @@ their own servers on random local ports.
 | Command | Purpose |
 |---|---|
 | `npm test` | Run the whole suite |
-| `npm run test:unit` | Storage engine only (`tests/unit/`) |
-| `npm run test:integration` | HTTP API, one real Express server per test (`tests/integration/`) |
+| `npm run test:unit` | Storage engine and configuration (`tests/unit/`) |
+| `npm run test:integration` | HTTP API, CORS, Swagger, startup and shutdown (`tests/integration/`) |
 | `npm run test:scenarios` | Business scenarios SC-001 to SC-006 (`tests/scenarios/`) |
 | `npm run test:coverage` | Run the suite with coverage and enforce the thresholds |
 | `npm run check` | Validate OpenAPI, then run the whole suite |

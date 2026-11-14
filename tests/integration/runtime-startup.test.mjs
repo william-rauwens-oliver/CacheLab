@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
-const projectRoot = new URL("../", import.meta.url);
+const projectRoot = new URL("../../", import.meta.url);
 
 function startWith(environment) {
   return spawnSync(process.execPath, ["dist/main.js"], {

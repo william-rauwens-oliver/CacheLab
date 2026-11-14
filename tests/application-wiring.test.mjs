@@ -1,3 +1,6 @@
+// Checks that the application is assembled through the storage port: the HTTP layer talks to
+// the cache repository, never directly to the engine.
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

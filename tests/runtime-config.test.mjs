@@ -1,3 +1,6 @@
+// Covers loading and validation of the runtime configuration (defaults, explicit values,
+// rejection of missing or invalid ones).
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

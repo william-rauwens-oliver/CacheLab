@@ -1,3 +1,6 @@
+// Covers the documentation endpoints: the OpenAPI 3.1 contract for the four CRUD operations,
+// Swagger UI, the redirect from the root route, and the default where documentation is off.
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

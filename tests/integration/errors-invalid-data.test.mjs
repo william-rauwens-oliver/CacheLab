@@ -1,6 +1,5 @@
 // HTTP integration: invalid data (RM-013, SC-004). Non-conforming bodies, malformed JSON,
 // wrong Content-Type, oversized bodies (413) and invalid URL encoding of the route key.
-// Tests marked todo document a known bug (CAC-31).
 
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
@@ -190,7 +189,7 @@ describe("Corps trop volumineux (413 PAYLOAD_TOO_LARGE)", () => {
   });
 });
 
-describe("Clé de route à l'encodage invalide (AGENTS.md §8 : 400)", () => {
+describe("Clé de route à l'encodage invalide (architecture 9.4 : 400)", () => {
   for (const [method, run] of [
     ["GET", (api) => api.raw("/api/v1/keys/%E0%A4%A")],
     [
@@ -204,16 +203,12 @@ describe("Clé de route à l'encodage invalide (AGENTS.md §8 : 400)", () => {
     ],
     ["DELETE", (api) => api.raw("/api/v1/keys/%E0%A4%A", { method: "DELETE" })]
   ]) {
-    test(
-      `${method} with an invalid percent-encoding answers 400`,
-      { todo: "CAC-31 : l'application répond 500 INTERNAL_ERROR" },
-      async (context) => {
-        const api = await startSeeded(context);
+    test(`${method} with an invalid percent-encoding answers 400`, async (context) => {
+      const api = await startSeeded(context);
 
-        const response = await run(api);
+      const response = await run(api);
 
-        assert.equal(response.status, 400);
-      }
-    );
+      assert.equal(response.status, 400);
+    });
   }
 });

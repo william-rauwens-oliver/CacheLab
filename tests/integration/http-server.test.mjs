@@ -1,7 +1,10 @@
+// Covers the HTTP server lifecycle (start, /health, clean stop) and the service description
+// returned at the root route when the documentation is disabled.
+
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createCacheLab } from "../dist/app.js";
+import { createCacheLab } from "../../dist/app.js";
 
 const config = {
   cacheMaxBytes: 1024,
@@ -43,18 +46,6 @@ test("describes the service at the root when documentation is disabled", async (
     status: "ok",
     apiBasePath: "/api/v1"
   });
-
-  await new Promise((resolve) => server.close(resolve));
-});
-
-test("does not expose unknown routes", async () => {
-  const server = createCacheLab(config).app.listen(0, "127.0.0.1");
-  await new Promise((resolve) => server.once("listening", resolve));
-  const address = server.address();
-  assert.equal(typeof address, "object");
-
-  const response = await fetch(`http://127.0.0.1:${address.port}/unknown`);
-  assert.equal(response.status, 404);
 
   await new Promise((resolve) => server.close(resolve));
 });

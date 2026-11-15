@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createCacheLab } from "../dist/app.js";
+import { createCacheLab } from "../../dist/app.js";
 
 const baseConfig = {
   cacheMaxBytes: 1024,

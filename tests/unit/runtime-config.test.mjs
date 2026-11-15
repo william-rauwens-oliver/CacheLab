@@ -1,7 +1,10 @@
+// Covers loading and validation of the runtime configuration (defaults, explicit values,
+// rejection of missing or invalid ones).
+
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { loadRuntimeConfig } from "../dist/config/runtime-config.js";
+import { loadRuntimeConfig } from "../../dist/config/runtime-config.js";
 
 test("loads external configuration with safe network defaults", () => {
   const config = loadRuntimeConfig({ CACHE_MAX_BYTES: "1024" });

@@ -3,7 +3,8 @@
 // of the same size, delete() of an existing key, create() of a new key, on a table of 10,000 then
 // 1,000,000 entries. delete() and create() change the table: each batch does 1,000 of them inside the
 // timed section, then undoes them outside of it, so the table has the same content at the start of
-// every batch. 1,000 creations never trigger a resize at these volumes (resize is a separate scenario).
+// every batch. 1,000 creations never trigger a resize at these volumes (resize is measured in
+// engine-structure.mjs).
 // Each Tinybench sample is the mean latency of a batch of calls: a single get() lasts a few tens of
 // nanoseconds, which is below the timer resolution, so timing one call at a time would give zeros.
 // Percentiles are therefore percentiles of batch means, not of single operations.
@@ -11,42 +12,11 @@
 
 import { Bench } from "tinybench";
 
-import { CustomHashTable } from "../dist/engine/hash-table/custom-hash-table.js";
+import { BATCH_SIZE, VALUE, batched, buildTable, latencyRow, scatter } from "./engine-helpers.mjs";
 import { saveResults } from "./save-results.mjs";
 
 const VOLUMES = [10_000, 1_000_000];
-const VALUE = "x".repeat(16);
 const UPDATED_VALUE = "y".repeat(16);
-const SCATTER_STEP = 7919;
-const BATCH_SIZE = 1000;
-const NANOSECONDS_PER_MILLISECOND = 1e6;
-
-function buildTable(volume) {
-  const cache = new CustomHashTable(volume * 64);
-  for (let index = 0; index < volume; index += 1) {
-    const result = cache.create(`key:${index}`, VALUE);
-    if (!result.ok) {
-      throw new Error(`preparation failed at ${index}: ${result.error}`);
-    }
-  }
-  return cache;
-}
-
-function scatter(volume) {
-  let cursor = 0;
-  return () => {
-    cursor = (cursor + SCATTER_STEP) % volume;
-    return cursor;
-  };
-}
-
-function exactPercentile(sortedSamples, percentile) {
-  return sortedSamples[Math.ceil(percentile * sortedSamples.length) - 1];
-}
-
-function toNanoseconds(milliseconds) {
-  return Math.round(milliseconds * NANOSECONDS_PER_MILLISECOND);
-}
 
 async function measureVolume(volume) {
   const cache = buildTable(volume);
@@ -69,18 +39,9 @@ async function measureVolume(volume) {
     retainSamples: true
   });
 
-  const batched = (operation) => () => {
-    const start = bench.now();
-    for (let call = 0; call < BATCH_SIZE; call += 1) {
-      operation();
-    }
-    const elapsed = bench.now() - start;
-    return { overriddenDuration: elapsed / BATCH_SIZE, overriddenIterationCost: elapsed };
-  };
-
   bench.add(
     "get existing key",
-    batched(() => {
+    batched(bench, () => {
       if (!cache.get(existingKeys[nextExisting()]).ok) {
         throw new Error("an existing key was not found");
       }
@@ -88,7 +49,7 @@ async function measureVolume(volume) {
   );
   bench.add(
     "get absent key",
-    batched(() => {
+    batched(bench, () => {
       if (cache.get(absentKeys[nextAbsent()]).ok) {
         throw new Error("an absent key was found");
       }
@@ -96,7 +57,7 @@ async function measureVolume(volume) {
   );
   bench.add(
     "update existing key (same size)",
-    batched(() => {
+    batched(bench, () => {
       if (!cache.update(existingKeys[nextUpdated()], UPDATED_VALUE).ok) {
         throw new Error("an existing key was not updated");
       }
@@ -156,20 +117,7 @@ async function measureVolume(volume) {
     throw new Error("the measured operations changed the table size");
   }
 
-  return bench.tasks.map((task) => {
-    const { latency, throughput } = task.result;
-    return {
-      scenario: task.name,
-      volume,
-      "ops/s": Math.round(throughput.mean),
-      "mean (ns)": toNanoseconds(latency.mean),
-      "p50 (ns)": toNanoseconds(latency.p50),
-      "p95 (ns)": toNanoseconds(exactPercentile(latency.samples, 0.95)),
-      "p99 (ns)": toNanoseconds(latency.p99),
-      "max (ns)": toNanoseconds(latency.max),
-      samples: latency.samplesCount
-    };
-  });
+  return bench.tasks.map((task) => latencyRow(task, { volume }));
 }
 
 const rows = [];

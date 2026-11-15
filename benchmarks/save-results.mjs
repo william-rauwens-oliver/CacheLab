@@ -1,6 +1,7 @@
-// Shared by the benchmark scripts: print the result table and save it as a JSON file in
+// Shared by the benchmark scripts: print the result table(s) and save them as a JSON file in
 // benchmarks/results/ (git-ignored), with the context needed to compare two runs later:
 // date, Node version, machine and the benchmark's own settings.
+// `results` is either an array of rows (one table) or an object {title: rows} (several tables).
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -9,8 +10,16 @@ import { fileURLToPath } from "node:url";
 
 const RESULTS_DIRECTORY = fileURLToPath(new URL("./results/", import.meta.url));
 
-export function saveResults(benchmark, settings, rows) {
-  console.table(rows);
+export function saveResults(benchmark, settings, results) {
+  const single = Array.isArray(results);
+  if (single) {
+    console.table(results);
+  } else {
+    for (const [title, rows] of Object.entries(results)) {
+      console.log(`\n${title}`);
+      console.table(rows);
+    }
+  }
 
   const startedAt = new Date();
   const report = {
@@ -24,7 +33,7 @@ export function saveResults(benchmark, settings, rows) {
       memoryGiB: Math.round(os.totalmem() / 1024 ** 3)
     },
     settings,
-    rows
+    ...(single ? { rows: results } : { tables: results })
   };
 
   mkdirSync(RESULTS_DIRECTORY, { recursive: true });
